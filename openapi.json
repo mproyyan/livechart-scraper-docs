@@ -1,0 +1,760 @@
+{
+   "openapi": "3.0.3",
+   "info": {
+      "title": "Livechart Scraper",
+      "description": "Livechart Scraper is RESTful application that provide anime infomartion, all the resources we got from livechart.me through the scraping method",
+      "contact": {
+         "name": "Royyan",
+         "email": "mproyyan@gmail.com"
+      },
+      "version": "1.0.0"
+   },
+   "servers": [
+      {
+         "url": "http://livechart-scraper.test/api",
+         "description": "Local server"
+      }
+   ],
+   "paths": {
+      "/register": {
+         "post": {
+            "tags": ["Authentication"],
+            "summary": "Register account",
+            "description": "Register new account with fresh email",
+            "requestBody": {
+               "required": true,
+               "description": "This data needed for register new acount",
+               "content": {
+                  "application/json": {
+                     "schema": {
+                        "type": "object",
+                        "properties": {
+                           "name": {
+                              "type": "string"
+                           },
+                           "email": {
+                              "type": "string"
+                           },
+                           "password": {
+                              "type": "string"
+                           },
+                           "password_confirmation": {
+                              "type": "string"
+                           }
+                        }
+                     }
+                  }
+               }
+            },
+            "responses": {
+               "201": {
+                  "description": "New account created",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "object",
+                           "properties": {
+                              "user": {
+                                 "$ref": "#/components/schemas/UserSchema"
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "422": {
+                  "description": "Unprocessable Entity",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/HttpExceptionSchema"
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      },
+      "/login": {
+         "post": {
+            "tags": ["Authentication"],
+            "summary": "Login account",
+            "description": "Login account and create token",
+            "requestBody": {
+               "required": true,
+               "description": "This data needed for acount login and create new token",
+               "content": {
+                  "application/json": {
+                     "schema": {
+                        "type": "object",
+                        "properties": {
+                           "email": {
+                              "type": "string"
+                           },
+                           "password": {
+                              "type": "string"
+                           },
+                           "token_name": {
+                              "type": "string"
+                           },
+                           "expired_at": {
+                              "type": "string",
+                              "format": "date"
+                           }
+                        }
+                     }
+                  }
+               }
+            },
+            "responses": {
+               "200": {
+                  "description": "Login success and token created",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "object",
+                           "properties": {
+                              "token": {
+                                 "$ref": "#/components/schemas/TokenSchema"
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "4XX": {
+                  "$ref": "#/components/responses/4XX"
+               }
+            }
+         }
+      },
+      "/logout": {
+         "post": {
+            "security": [
+               {
+                  "SanctumAuth": []
+               }
+            ],
+            "tags": ["Authentication"],
+            "summary": "Logout account",
+            "description": "Logout an account and delete current token",
+            "parameters": [
+               {
+                  "$ref": "#/components/parameters/AuthorizationParameter"
+               }
+            ],
+            "responses": {
+               "200": {
+                  "description": "Logout successfully and current token deleted",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "object",
+                           "properties": {
+                              "token": {
+                                 "$ref": "#/components/schemas/TokenSchema"
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "4XX": {
+                  "$ref": "#/components/responses/4XX"
+               }
+            }
+         }
+      },
+      "/tv/{season}/{year}": {
+         "get": {
+            "security": [
+               {
+                  "SanctumAuth": []
+               }
+            ],
+            "tags": ["Anime TV"],
+            "summary": "Get Animes TV format",
+            "description": "Get Animes TV format by season and year, if season and year not included then it will get animes according current season and year.",
+            "parameters": [
+               {
+                  "$ref": "#/components/parameters/AuthorizationParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/SeasonParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/YearParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/PageParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/SortByParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/TitlesParamater"
+               }
+            ],
+            "responses": {
+               "200": {
+                  "description": "Get Anime TV format successfully",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "object",
+                           "properties": {
+                              "animes": {
+                                 "type": "array",
+                                 "items": {
+                                    "$ref": "#/components/schemas/AnimeSchema"
+                                 }
+                              },
+                              "pagination": {
+                                 "$ref": "#/components/schemas/PaginationSchema"
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "4XX": {
+                  "$ref": "#/components/responses/4XX"
+               }
+            }
+         }
+      },
+      "/movies/{season}/{year}": {
+         "get": {
+            "security": [
+               {
+                  "SanctumAuth": []
+               }
+            ],
+            "tags": ["Anime Movie"],
+            "summary": "Get Animes Movies format",
+            "description": "Get Animes Movies format by season and year, if season and year not included then it will get animes according current season and year.",
+            "parameters": [
+               {
+                  "$ref": "#/components/parameters/AuthorizationParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/SeasonParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/YearParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/PageParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/SortByParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/TitlesParamater"
+               }
+            ],
+            "responses": {
+               "200": {
+                  "description": "Get Anime Movie format successfully",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "object",
+                           "properties": {
+                              "animes": {
+                                 "type": "array",
+                                 "items": {
+                                    "$ref": "#/components/schemas/AnimeSchema"
+                                 }
+                              },
+                              "pagination": {
+                                 "$ref": "#/components/schemas/PaginationSchema"
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "4XX": {
+                  "$ref": "#/components/responses/4XX"
+               }
+            }
+         }
+      },
+      "/ovas/{season}/{year}": {
+         "get": {
+            "security": [
+               {
+                  "SanctumAuth": []
+               }
+            ],
+            "tags": ["Anime OVA"],
+            "summary": "Get Animes OVA format",
+            "description": "Get Animes OVA format by season and year, if season and year not included then it will get animes according current season and year.",
+            "parameters": [
+               {
+                  "$ref": "#/components/parameters/AuthorizationParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/SeasonParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/YearParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/PageParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/SortByParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/TitlesParamater"
+               }
+            ],
+            "responses": {
+               "200": {
+                  "description": "Get Anime OVA format successfully",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "object",
+                           "properties": {
+                              "animes": {
+                                 "type": "array",
+                                 "items": {
+                                    "$ref": "#/components/schemas/AnimeSchema"
+                                 }
+                              },
+                              "pagination": {
+                                 "$ref": "#/components/schemas/PaginationSchema"
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "4XX": {
+                  "$ref": "#/components/responses/4XX"
+               }
+            }
+         }
+      },
+      "/anime/{id}": {
+         "get": {
+            "security": [
+               {
+                  "SanctumAuth": []
+               }
+            ],
+            "tags": ["Anime by id"],
+            "summary": "Get Anime by id",
+            "description": "Get Anime by id",
+            "parameters": [
+               {
+                  "$ref": "#/components/parameters/AuthorizationParameter"
+               },
+               {
+                  "in": "path",
+                  "required": true,
+                  "name": "id",
+                  "schema": {
+                     "type": "integer"
+                  }
+               }
+            ],
+            "responses": {
+               "200": {
+                  "description": "Get Anime OVA format successfully",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "object",
+                           "properties": {
+                              "anime": {
+                                 "$ref": "#/components/schemas/AnimeSchema"
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "4XX": {
+                  "$ref": "#/components/responses/4XX"
+               }
+            }
+         }
+      },
+      "/search": {
+         "get": {
+            "security": [
+               {
+                  "SanctumAuth": []
+               }
+            ],
+            "tags": ["Anime Search"],
+            "summary": "Search Anime",
+            "description": "Search Anime by title",
+            "parameters": [
+               {
+                  "$ref": "#/components/parameters/AuthorizationParameter"
+               },
+               {
+                  "in": "query",
+                  "required": true,
+                  "name": "query",
+                  "schema": {
+                     "type": "string"
+                  }
+               },
+               {
+                  "$ref": "#/components/parameters/PageParameter"
+               },
+               {
+                  "$ref": "#/components/parameters/TitlesParamater"
+               }
+            ],
+            "responses": {
+               "200": {
+                  "description": "Get Anime by title successfully",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "object",
+                           "properties": {
+                              "animes": {
+                                 "type": "array",
+                                 "items": {
+                                    "$ref": "#/components/schemas/AnimeSchema"
+                                 }
+                              },
+                              "pagination": {
+                                 "$ref": "#/components/schemas/PaginationSchema"
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "4XX": {
+                  "$ref": "#/components/responses/4XX"
+               }
+            }
+         }
+      }
+   },
+   "components": {
+      "schemas": {
+         "UserSchema": {
+            "type": "object",
+            "properties": {
+               "name": {
+                  "type": "string"
+               },
+               "email": {
+                  "type": "string"
+               }
+            }
+         },
+         "TokenSchema": {
+            "type": "object",
+            "properties": {
+               "token_name": {
+                  "type": "string"
+               },
+               "abilities": {
+                  "type": "array",
+                  "items": {
+                     "type": "string"
+                  },
+                  "minItems": 1
+               },
+               "expired_at": {
+                  "type": "string",
+                  "format": "date-time"
+               },
+               "token": {
+                  "type": "string"
+               },
+               "status": {
+                  "type": "string"
+               }
+            }
+         },
+         "AnimeSchema": {
+            "type": "object",
+            "properties": {
+               "id": {
+                  "type": "integer"
+               },
+               "title": {
+                  "type": "string"
+               },
+               "image": {
+                  "type": "string"
+               },
+               "synopsis": {
+                  "type": "string"
+               },
+               "formatted_synopsis": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                     "type": "string"
+                  }
+               },
+               "genres": {
+                  "type": "array",
+                  "minItems": 0,
+                  "items": {
+                     "type": "object",
+                     "properties": {
+                        "genre_id": {
+                           "type": "integer"
+                        },
+                        "genre": {
+                           "type": "string"
+                        }
+                     }
+                  }
+               },
+               "type": {
+                  "type": "string"
+               },
+               "source": {
+                  "type": "string"
+               },
+               "episodes": {
+                  "type": "integer",
+                  "nullable": true
+               },
+               "duration": {
+                  "type": "object",
+                  "properties": {
+                     "hours": {
+                        "type": "integer",
+                        "nullable": true
+                     },
+                     "minutes": {
+                        "type": "integer",
+                        "nullable": true
+                     },
+                     "seconds": {
+                        "type": "integer",
+                        "nullable": true
+                     }
+                  }
+               },
+               "aired": {
+                  "type": "object",
+                  "properties": {
+                     "premiere": {
+                        "type": "string"
+                     },
+                     "props": {
+                        "type": "object",
+                        "properties": {
+                           "day": {
+                              "type": "integer",
+                              "nullable": true
+                           },
+                           "month": {
+                              "type": "integer",
+                              "nullable": true
+                           },
+                           "year": {
+                              "type": "integer",
+                              "nullable": true
+                           }
+                        }
+                     }
+                  }
+               },
+               "season": {
+                  "type": "string",
+                  "nullable": true
+               },
+               "year": {
+                  "type": "integer",
+                  "nullable": true
+               },
+               "studios": {
+                  "type": "array",
+                  "minItems": 0,
+                  "items": {
+                     "type": "string"
+                  }
+               }
+            }
+         },
+         "PaginationSchema": {
+            "type": "object",
+            "properties": {
+               "current_page": {
+                  "type": "integer"
+               },
+               "last_page": {
+                  "type": "integer"
+               },
+               "from": {
+                  "type": "integer"
+               },
+               "to": {
+                  "type": "integer"
+               },
+               "items": {
+                  "type": "object",
+                  "properties": {
+                     "count": {
+                        "type": "integer"
+                     },
+                     "per_page": {
+                        "type": "integer"
+                     },
+                     "total": {
+                        "type": "integer"
+                     }
+                  }
+               },
+               "links": {
+                  "type": "object",
+                  "properties": {
+                     "first": {
+                        "type": "string"
+                     },
+                     "last": {
+                        "type": "string"
+                     },
+                     "prev": {
+                        "type": "string",
+                        "nullable": true
+                     },
+                     "next": {
+                        "type": "string",
+                        "nullable": true
+                     }
+                  }
+               }
+            }
+         },
+         "HttpExceptionSchema": {
+            "type": "object",
+            "properties": {
+               "status": {
+                  "type": "integer"
+               },
+               "type": {
+                  "type": "string"
+               },
+               "title": {
+                  "type": "string"
+               },
+               "detail": {
+                  "type": "string"
+               }
+            }
+         }
+      },
+      "responses": {
+         "4XX": {
+            "description": "",
+            "content": {
+               "application/json": {
+                  "schema": {
+                     "$ref": "#/components/schemas/HttpExceptionSchema"
+                  }
+               }
+            }
+         }
+      },
+      "parameters": {
+         "SeasonParameter": {
+            "in": "path",
+            "required": false,
+            "name": "season",
+            "schema": {
+               "type": "string"
+            },
+            "examples": {
+               "Winter": {
+                  "value": "winter"
+               },
+               "Spring": {
+                  "value": "spring"
+               },
+               "Summer": {
+                  "value": "summer"
+               },
+               "Fall": {
+                  "value": "fall"
+               }
+            }
+         },
+         "YearParameter": {
+            "in": "path",
+            "required": false,
+            "name": "year",
+            "schema": {
+               "type": "integer"
+            }
+         },
+         "PageParameter": {
+            "in": "query",
+            "required": false,
+            "name": "page",
+            "schema": {
+               "type": "integer"
+            }
+         },
+         "SortByParameter": {
+            "in": "query",
+            "required": false,
+            "name": "sortby",
+            "schema": {
+               "type": "string"
+            },
+            "examples": {
+               "Popularity": {
+                  "value": "popularity"
+               },
+               "Title": {
+                  "value": "title"
+               },
+               "Average user rating": {
+                  "value": "anime.avg_rating"
+               }
+            }
+         },
+         "TitlesParamater": {
+            "in": "query",
+            "required": false,
+            "name": "titles",
+            "schema": {
+               "type": "string"
+            },
+            "examples": {
+               "Romaji": {
+                  "value": "romaji"
+               },
+               "English": {
+                  "value": "english"
+               }
+            }
+         },
+         "AuthorizationParameter": {
+            "in": "header",
+            "required": true,
+            "description": "Add prefix \"Bearer\" before your token",
+            "name": "Authorization",
+            "schema": {
+               "type": "string"
+            }
+         }
+      },
+      "securitySchemes": {
+         "SanctumAuth": {
+            "type": "http",
+            "scheme": "bearer"
+         }
+      }
+   }
+}
